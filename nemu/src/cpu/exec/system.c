@@ -2,10 +2,13 @@
 
 void diff_test_skip_qemu();
 void diff_test_skip_nemu();
+extern void raise_intr(uint8_t NO, vaddr_t ret_addr);
 
 make_EHelper(lidt) {
-  TODO();
-
+  //TODO();
+  if(decoding.is_operand_size_16) cpu.IDTR.Base = vaddr_read(id_dest->addr+2,3);
+  else cpu.IDTR.Base = vaddr_read(id_dest->addr+2,4);
+  cpu.IDTR.Limit = vaddr_read(id_dest->addr,2);
   print_asm_template1(lidt);
 }
 
@@ -26,8 +29,9 @@ make_EHelper(mov_cr2r) {
 }
 
 make_EHelper(int) {
-  TODO();
-
+  //TODO();
+  raise_intr(id_dest->val,*eip);
+  
   print_asm("int %s", id_dest->str);
 
 #ifdef DIFF_TEST
@@ -36,8 +40,11 @@ make_EHelper(int) {
 }
 
 make_EHelper(iret) {
-  TODO();
-
+  //TODO();
+  rtl_pop(&decoding.jmp_eip);
+  decoding.is_jmp = 1;
+  rtl_pop(&cpu.CS);
+  rtl_pop(&cpu.EFLAGS);
   print_asm("iret");
 }
 
@@ -45,7 +52,8 @@ uint32_t pio_read(ioaddr_t, int);
 void pio_write(ioaddr_t, int, uint32_t);
 
 make_EHelper(in) {
-  TODO();
+  t1 = pio_read(id_src->val,id_dest->width);
+  operand_write(id_dest,&t1);
 
   print_asm_template2(in);
 
@@ -55,7 +63,7 @@ make_EHelper(in) {
 }
 
 make_EHelper(out) {
-  TODO();
+  pio_write(id_dest->val, id_dest->width, id_src->val);
 
   print_asm_template2(out);
 
