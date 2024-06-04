@@ -2,7 +2,9 @@
 
 /* Uncomment these macros to enable corresponding functionality. */
 #define HAS_ASYE
-//#define HAS_PTE
+#define HAS_PTE
+
+extern void load_prog(const char* filename);
 
 void init_mm(void);
 void init_ramdisk(void);
@@ -35,9 +37,16 @@ int main() {
   uint32_t entry = loader(NULL, NULL);
   ((void (*)(void))entry)();
   */
+
+  /*
   Log("loading1...");
-  uint32_t entry = loader(NULL, "/bin/pal");
+  uint32_t entry = loader(NULL, "/bin/dummy");
   ((void (*)(void))entry)();
+  */
+
+  load_prog("/bin/pal");
+  load_prog("/bin/hello");
+  _trap();
 
   panic("Should not reach here");
 }

@@ -19,7 +19,10 @@ void raise_intr(uint8_t NO, vaddr_t ret_addr) {
   
   decoding.is_jmp = 1;
   decoding.jmp_eip = target_addr;
+
+  cpu.eflags.IF = 0;
 }
 
 void dev_raise_intr() {
+  cpu.INTR = true;
 }

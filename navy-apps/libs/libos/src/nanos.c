@@ -36,7 +36,7 @@ intptr_t pb = (intptr_t)&_end;
 void *_sbrk(intptr_t increment){
   //return (void *)-1;
   intptr_t old_pb = pb;
-  if(_syscall_(SYS_brk, old_pb+increment, 0, 0)==0){//���óɹ�
+  if(_syscall_(SYS_brk, old_pb+increment, 0, 0)==0){//调用成功
     pb += increment;
     return (void *)old_pb;
   }

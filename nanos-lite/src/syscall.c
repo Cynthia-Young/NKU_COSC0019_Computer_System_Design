@@ -7,6 +7,8 @@ extern ssize_t fs_read(int fd, void *buf, size_t len);
 extern ssize_t fs_write(int fd, const void *buf, size_t len);
 extern off_t fs_lseek(int fd, off_t offset, int whence);
 
+extern int mm_brk(uint32_t new_brk);
+
 int sys_write(int fd,void* buf,size_t len) {
   if(fd==1||fd==2){
     for(int i=0;i<len;i++){
@@ -44,7 +46,7 @@ _RegSet* do_syscall(_RegSet *r) {
     }
     case SYS_brk:{
       //Log("sys_brk");
-      SYSCALL_ARG1(r) = 0;
+      SYSCALL_ARG1(r) = mm_brk(a[1]);
       break;
     }
     case SYS_open:{
