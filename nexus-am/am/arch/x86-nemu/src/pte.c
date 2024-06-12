@@ -64,13 +64,28 @@ void _release(_Protect *p) {
 void _switch(_Protect *p) {
   set_cr3(p->ptr);
 }
-
+  
 void _map(_Protect *p, void *va, void *pa) {
+  PDE *pt = (PDE*)p->ptr;
+  PDE *pde = &pt[PDX(va)];
+  if (!(*pde & PTE_P)) *pde = PTE_P | PTE_W | PTE_U | (uint32_t)palloc_f();
+  PTE *pte = &((PTE*)PTE_ADDR(*pde))[PTX(va)];
+  if (!(*pte & PTE_P)) *pte = PTE_P | PTE_W | PTE_U | (uint32_t)pa;
 }
 
 void _unmap(_Protect *p, void *va) {
 }
 
 _RegSet *_umake(_Protect *p, _Area ustack, _Area kstack, void *entry, char *const argv[], char *const envp[]) {
-  return NULL;
+  _RegSet **tf=ustack.start;
+  uint32_t *tempStack=(uint32_t *)(ustack.end - 4);
+  for(int i=0;i<3;i++){
+    (*tempStack)=0;
+    (*tempStack)--;
+  }
+  (*tf)=(void *)(tempStack-sizeof(_RegSet));
+  (*tf)->eflags=0x2|(1<<9);
+  (*tf)->cs=8;
+  (*tf)->eip=(uintptr_t)entry;
+  return *tf;
 }
